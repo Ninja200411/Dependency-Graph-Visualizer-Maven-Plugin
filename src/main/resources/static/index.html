@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dependency Graph</title>
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        #controls {
+            padding: 10px;
+            background-color: #f4f4f4;
+            border-bottom: 1px solid #ccc;
+        }
+
+        #mynetwork {
+            width: 100%;
+            height: 92vh;
+        }
+
+        .module-toggle {
+            margin-right: 15px;
+        }
+        #only-modules-btn {
+            margin-left: 20px;
+            padding: 5px 10px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div id="controls">
+    <strong>Filter Module:</strong>
+    <span id="module-filters"></span>
+    <label style="margin-left: 20px;">
+        <input type="checkbox" id="only-modules-toggle">
+        Nur Module anzeigen
+    </label>
+</div>
+
+<div id="mynetwork"></div>
+
+<script>
+    const rawData = [] //DATA
+
+    const allNodes = rawData.nodes;
+    const allEdges = rawData.edges;
+
+
+    const moduleMap = {};
+    const nodeById = {};
+    const colors = {};
+    const baseColors = [
+        '#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231',
+        '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe',
+        '#008080', '#e6beff', '#9a6324', '#fffac8', '#800000'
+    ];
+
+    let colorIndex = 0;
+
+    allNodes.forEach(node => {
+        if(node.module == "true") {
+            nodeById[node.id] = node;
+
+            const moduleName = getModuleFromNodeId(node.id);
+            if (!moduleMap[moduleName]) {
+                moduleMap[moduleName] = [];
+                colors[moduleName] = baseColors[colorIndex++ % baseColors.length];
+            }
+            moduleMap[moduleName].push(node.id);
+            node.color = {background: colors[moduleName], border: '#000'};
+        }
+    });
+
+    allEdges.forEach( edge =>{
+            node = nodeById[edge.from];
+            edge.color = {color: node.color.background};
+        }
+    )
+
+    const nodes = new vis.DataSet(allNodes);
+    const edges = new vis.DataSet(allEdges);
+    const container = document.getElementById('mynetwork');
+    const networkData = {nodes, edges};
+
+    const options = {
+        nodes: {
+            shape: 'dot',
+            size: 15,
+            font: {size: 14, color: '#000'}
+        },
+        edges: {
+            arrows: 'to',
+            color: {color: '#ccc'}
+        },
+        physics: {
+            stabilization: false,
+            barnesHut: {gravitationalConstant: -30000}
+        }
+    };
+
+    const network = new vis.Network(container, networkData, options);
+
+
+    const filterContainer = document.getElementById('module-filters');
+    Object.keys(moduleMap).forEach(module => {
+        const id = `mod-${module}`;
+        const label = document.createElement('label');
+        label.className = "module-toggle";
+        label.innerHTML = `
+          <input type="checkbox" id="${id}" checked>
+          <span style="color:${colors[module]}">■</span> ${module}
+        `;
+        filterContainer.appendChild(label);
+
+        document.getElementById(id).addEventListener('change', (e) => {
+            const visible = e.target.checked;
+            const affectedIds = moduleMap[module];
+
+            affectedIds.forEach(nodeId => {
+                if (visible) {
+                    nodes.update(nodeById[nodeId]);
+                } else {
+                    nodes.remove(nodeId);
+                }
+            });
+
+            updateEdges();
+        });
+    });
+
+    document.getElementById("only-modules-toggle").addEventListener("change", (e) => {
+        const showOnlyModules = e.target.checked;
+
+        const visibleNodes = [];
+
+        allNodes.forEach(node => {
+            const isModule = node.module === "true";
+
+            if (showOnlyModules && !isModule) {
+                nodes.remove(node.id);
+            } else if (!nodes.get(node.id)) {
+
+                nodes.update(node);
+            }
+
+            if (!showOnlyModules || isModule) {
+                visibleNodes.push(node.id);
+            }
+        });
+
+        const filteredEdges = allEdges.filter(edge =>
+            visibleNodes.includes(edge.from) && visibleNodes.includes(edge.to)
+        );
+        edges.clear();
+        edges.add(filteredEdges);
+    });
+
+
+    function updateEdges() {
+        const visibleNodeIds = new Set(nodes.getIds());
+        const filteredEdges = allEdges.filter(edge =>
+            visibleNodeIds.has(edge.from) && visibleNodeIds.has(edge.to)
+        );
+        edges.clear();
+        edges.add(filteredEdges);
+    }
+
+
+    function getModuleFromNodeId(id) {
+        if (id.includes(":")) {
+            return id.split(":")[1];
+        }
+        return id;
+    }
+</script>
+</body>
+</html>
