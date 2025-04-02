@@ -6,15 +6,39 @@
 
     <groupId>de.larshurst</groupId>
     <artifactId>dependency-graph-visualizer-maven-plugin</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>maven-plugin</packaging>
-
     <name>dependency-graph-visualizer-maven-plugin Maven Mojo</name>
-    <url>http://maven.apache.org</url>
+    <url>https://github.com/Ninja200411/Dependency-Graph-Visualizer-Maven-Plugin</url>
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 
     <developers>
-        
+        <developer>
+            <id>Ninja200411</id>
+            <name>Lars Hurst</name>
+            <email>lars.hurst.lh1@gmail.com</email>
+            <url>https://larshurst.de</url>
+            <roles>
+                <role>developer</role>
+            </roles>
+            <properties>
+                <github>https://github.com/Ninja200411</github>
+            </properties>
+        </developer>
     </developers>
+
+    <scm>
+        <connection>scm:git:https://github.com/Ninja200411/Dependency-Graph-Visualizer-Maven-Plugin.git</connection>
+        <developerConnection>scm:git:git@github.com:Ninja200411/Dependency-Graph-Visualizer-Maven-Plugin.git</developerConnection>
+        <url>https://github.com/Ninja200411/Dependency-Graph-Visualizer-Maven-Plugin</url>
+        <tag>HEAD</tag>
+    </scm>
 
     <dependencies>
         <dependency>
@@ -39,30 +63,6 @@
             <version>2.18.3</version>
         </dependency>
     </dependencies>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>11</source>
-                    <target>11</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>de.larshurst</groupId>
-                <artifactId>dependency-graph-visualizer-maven-plugin</artifactId>
-                <version>1.0-SNAPSHOT</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>visualize</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 
 
 </project>
